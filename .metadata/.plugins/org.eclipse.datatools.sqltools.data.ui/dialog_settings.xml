@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section name="Workbench">
+	<section name="Extract/Load file format wizard page">
+		<item key="File path" value="C:\Users\baran\Desktop\xyz.csv"/>
+		<item key="Column delimiter" value="Comma"/>
+		<item key="String delimiter" value="&quot;"/>
+	</section>
+</section>

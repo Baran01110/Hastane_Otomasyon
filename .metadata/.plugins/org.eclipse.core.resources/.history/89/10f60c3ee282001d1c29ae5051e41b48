@@ -1,0 +1,418 @@
+package View;
+
+import java.awt.EventQueue;
+
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.border.EmptyBorder;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
+import javax.swing.table.DefaultTableModel;
+
+import Model.Bashekim;
+import Model.Klinik;
+
+import java.awt.Color;
+import javax.swing.JLabel;
+import javax.swing.JMenuItem;
+
+import java.awt.Font;
+import java.awt.Point;
+
+import javax.swing.JButton;
+import javax.swing.JTabbedPane;
+import javax.swing.JTextField;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.sql.SQLException;
+import java.awt.event.ActionEvent;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import Helper.*;
+import javax.swing.JComboBox;
+
+
+public class BashekimGUI extends JFrame {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	static Bashekim bashekim = new Bashekim();
+	private JPanel w_pane;
+	private JTextField txtAddoktoryntm;
+	private JTextField txttcdktryntm;
+	private JTextField txtsfredktryntm;
+	private JTable tableDoktor;
+	private DefaultTableModel doctorModel = null;
+	private Object[] doctorData = null;
+	private JTextField txtkullaniciid;
+	private JTable tableKlinik;
+	private JTextField txtKlinikAdi;
+	private DefaultTableModel klinikModel = null;
+	private Object[] klinikData = null;
+	Klinik klinik = new Klinik();
+	private JPopupMenu klinikMenu;
+
+	/**
+	 * Launch the application.
+	 */
+	public static void main(String[] args) {
+		EventQueue.invokeLater(new Runnable() {
+			public void run() {
+				try {
+					BashekimGUI frame = new BashekimGUI(bashekim);
+					frame.setVisible(true);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+	}
+
+	/**
+	 * Create the frame.
+	 * @throws SQLException 
+	 */
+	public BashekimGUI(Bashekim bashekim) throws SQLException {
+		
+		doctorModel = new DefaultTableModel();
+		Object[] colDoctorName = new Object[4];
+		colDoctorName[0] = "id";
+		colDoctorName[1] = "name";
+		colDoctorName[2] = "tcno";
+		colDoctorName[3] = "password";
+		doctorModel.setColumnIdentifiers(colDoctorName);
+		doctorData = new Object [4];
+		for(int i=0; i< bashekim.getDoctorList().size(); i++) {
+			doctorData[0] = bashekim.getDoctorList().get(i).getId();
+			doctorData[1] = bashekim.getDoctorList().get(i).getName();
+			doctorData[2] = bashekim.getDoctorList().get(i).getTcno();
+			doctorData[3] = bashekim.getDoctorList().get(i).getPassword();
+			doctorModel.addRow(doctorData);
+		}
+		
+		klinikModel = new DefaultTableModel();
+		Object[] colKlinik = new Object[2];
+		colKlinik[0] = "ID";
+		colKlinik[1] = "Poliklinik Adı";
+		
+		klinikModel.setColumnIdentifiers(colKlinik);
+		klinikData = new Object [2];
+		for(int i=0; i< klinik.getList().size(); i++) {
+			klinikData[0] = klinik.getList().get(i).getId();
+			klinikData[1] = klinik.getList().get(i).getName();
+			klinikModel.addRow(klinikData);
+		}
+		
+		setTitle("Hastane Yönetim Ekranı");
+		setResizable(false);
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setBounds(100, 100, 743, 525);
+		w_pane = new JPanel();
+		w_pane.setBackground(Color.WHITE);
+		w_pane.setBorder(new EmptyBorder(5, 5, 5, 5));
+
+		setContentPane(w_pane);
+		w_pane.setLayout(null);
+		
+		JLabel lblNewLabel = new JLabel("Hoşgeldiniz Sayın " + bashekim.getName());
+		lblNewLabel.setBounds(10, 28, 307, 38);
+		lblNewLabel.setFont(new Font("Yu Gothic UI Semibold", Font.ITALIC, 20));
+		w_pane.add(lblNewLabel);
+		
+		JButton btnNewButton = new JButton("Çıkış Yap");
+		btnNewButton.setBounds(569, 28, 120, 21);
+		btnNewButton.setFont(new Font("Tahoma", Font.BOLD, 16));
+		w_pane.add(btnNewButton);
+		
+		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
+		tabbedPane.setBounds(26, 87, 652, 335);
+		w_pane.add(tabbedPane);
+		
+		JPanel panel = new JPanel();
+		panel.setBackground(Color.WHITE);
+		tabbedPane.addTab("Doktor Paneli", null, panel, null);
+		panel.setLayout(null);
+		
+		JLabel lblNewLabel_1 = new JLabel("Ad Soyad");
+		lblNewLabel_1.setFont(new Font("Tahoma", Font.BOLD, 14));
+		lblNewLabel_1.setBounds(482, -6, 107, 27);
+		panel.add(lblNewLabel_1);
+		
+		JButton btnEkleDoktorYntm = new JButton("Ekle");
+		btnEkleDoktorYntm.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if(txtAddoktoryntm.getText().length() == 0 || txtsfredktryntm.getText().length() == 0 || txttcdktryntm.getText().length() == 0) {
+					Helper.showMsg("fill");
+				}else {
+					try {
+						boolean control = bashekim.addDoctor(txttcdktryntm.getText(), txtsfredktryntm.getText(), txtAddoktoryntm.getText());
+						if(control) {
+							Helper.showMsg("success");
+							txtAddoktoryntm.setText(null);
+							txttcdktryntm.setText(null);
+							txtsfredktryntm.setText(null);
+							updateDoctorModel();
+						}
+					} catch (SQLException e1) {
+						
+						e1.printStackTrace();
+					}
+				}
+			}
+		});
+		btnEkleDoktorYntm.setFont(new Font("Tahoma", Font.BOLD, 16));
+		btnEkleDoktorYntm.setBounds(432, 183, 174, 29);
+		panel.add(btnEkleDoktorYntm);
+		
+		txtAddoktoryntm = new JTextField();
+		txtAddoktoryntm.setBounds(432, 31, 174, 27);
+		panel.add(txtAddoktoryntm);
+		txtAddoktoryntm.setColumns(10);
+		
+		txttcdktryntm = new JTextField();
+		txttcdktryntm.setColumns(10);
+		txttcdktryntm.setBounds(432, 88, 174, 27);
+		panel.add(txttcdktryntm);
+		
+		JLabel lblNewLabel_1_1 = new JLabel("T.C. No");
+		lblNewLabel_1_1.setFont(new Font("Tahoma", Font.BOLD, 14));
+		lblNewLabel_1_1.setBounds(482, 56, 107, 27);
+		panel.add(lblNewLabel_1_1);
+		
+		JButton btnSil = new JButton("Sil");
+		btnSil.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if(txtkullaniciid.getText().length() == 0) {
+					Helper.showMsg("Lütfen Geçerli Doktor Seçiniz !!");
+				}else {
+					if(Helper.confirm("sure")) {
+						int selectID = Integer.parseInt(txtkullaniciid.getText());
+						try {
+							boolean control = bashekim.deleteDoctor(selectID);
+							if(control) {
+								Helper.showMsg("success");
+								txtkullaniciid.setText(null);
+								updateDoctorModel();
+							}
+						} catch (SQLException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
+					}
+				}
+			}
+		});
+		btnSil.setFont(new Font("Tahoma", Font.BOLD, 16));
+		btnSil.setBounds(437, 271, 169, 27);
+		panel.add(btnSil);
+		
+		JLabel lblNewLabel_1_1_1 = new JLabel("Şifre");
+		lblNewLabel_1_1_1.setFont(new Font("Tahoma", Font.BOLD, 14));
+		lblNewLabel_1_1_1.setBounds(482, 109, 107, 27);
+		panel.add(lblNewLabel_1_1_1);
+		
+		txtsfredktryntm = new JTextField();
+		txtsfredktryntm.setColumns(10);
+		txtsfredktryntm.setBounds(432, 146, 174, 27);
+		panel.add(txtsfredktryntm);
+		
+		JScrollPane scrollPane = new JScrollPane();
+		scrollPane.setBounds(5, 10, 411, 288);
+		panel.add(scrollPane);
+		
+		tableDoktor = new JTable(doctorModel);
+		scrollPane.setViewportView(tableDoktor);
+		tableDoktor.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+			
+			@Override
+			public void valueChanged(ListSelectionEvent e) {
+				
+				 try {
+					 txtkullaniciid.setText(tableDoktor.getValueAt(tableDoktor.getSelectedRow(), 0).toString());
+
+				 }catch(Exception ex){
+					 
+				 }
+			}
+		});
+		tableDoktor.getModel().addTableModelListener(new TableModelListener() {
+			
+			@Override
+			public void tableChanged(TableModelEvent e) {
+				if(e.getType() == TableModelEvent.UPDATE) {
+					int selectID = Integer.parseInt(tableDoktor.getValueAt(tableDoktor.getSelectedRow(), 0).toString());
+					String selectName = tableDoktor.getValueAt(tableDoktor.getSelectedRow(), 1).toString();
+					String selectTcno = tableDoktor.getValueAt(tableDoktor.getSelectedRow(), 2).toString();
+					String selectPass = tableDoktor.getValueAt(tableDoktor.getSelectedRow(), 3).toString();
+					
+					try {
+						boolean control =  bashekim.updateDoctor(selectID, selectTcno, selectPass, selectName);
+						
+					} catch (SQLException e1) {
+						  
+						e1.printStackTrace();
+					}
+				}
+			}
+		});
+		
+		txtkullaniciid = new JTextField();
+		txtkullaniciid.setBounds(432, 234, 174, 27);
+		panel.add(txtkullaniciid);
+		txtkullaniciid.setColumns(10);
+		
+		JLabel lblNewLabel_1_1_1_1 = new JLabel("Kullanıcı ID");
+		lblNewLabel_1_1_1_1.setFont(new Font("Tahoma", Font.BOLD, 14));
+		lblNewLabel_1_1_1_1.setBounds(482, 210, 107, 27);
+		panel.add(lblNewLabel_1_1_1_1);
+		
+		JPanel panelklinik = new JPanel();
+		panelklinik.setBackground(Color.WHITE);
+		tabbedPane.addTab("Klinikler", null, panelklinik, null);
+		panelklinik.setLayout(null);
+		
+		JScrollPane scrollKlinik = new JScrollPane();
+		scrollKlinik.setBounds(10, 10, 275, 288);
+		panelklinik.add(scrollKlinik);
+		
+		klinikMenu = new JPopupMenu();
+		JMenuItem updateMenu = new JMenuItem("Güncelle");
+		JMenuItem deleteMenu = new JMenuItem("Sil");
+		klinikMenu.add(updateMenu);
+		klinikMenu.add(deleteMenu);
+		
+		updateMenu.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+			int selID = Integer.parseInt(tableKlinik.getValueAt(tableKlinik.getSelectedRow(), 0).toString());
+			Klinik selectKlinik = klinik.getFetch(selID);
+			UpdateKlinikGUI updateGUI = new UpdateKlinikGUI(selectKlinik);
+			updateGUI.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+			updateGUI.setVisible(true);
+			updateGUI.addWindowListener(new WindowAdapter() {
+				@Override
+				public void windowClosed(WindowEvent e) {
+					try {
+						updateClinicModel();
+					} catch (SQLException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+				}
+			});
+			}
+		});
+		
+		deleteMenu.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if(Helper.confirm("sure")) {
+					int selID = Integer.parseInt(tableKlinik.getValueAt(tableKlinik.getSelectedRow(), 0).toString());
+					try {
+						if(klinik.deleteKlinik(selID)) {
+							Helper.showMsg("success");
+							updateClinicModel();
+						}else { 
+							Helper.showMsg("error");
+						}
+					} catch (SQLException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+				}
+				
+			}
+		});
+		
+		tableKlinik = new JTable(klinikModel);
+		tableKlinik.setComponentPopupMenu(klinikMenu);
+		tableKlinik.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mousePressed(MouseEvent e) {
+				Point point = e.getPoint();
+				int selectedRow = tableKlinik.rowAtPoint(point);
+				tableKlinik.setRowSelectionInterval(selectedRow, selectedRow);
+				
+			}
+		}); 
+		scrollKlinik.setViewportView(tableKlinik);
+		
+		JLabel lblNewLabel_1_2 = new JLabel("Poliklinik Adı");
+		lblNewLabel_1_2.setFont(new Font("Tahoma", Font.BOLD, 14));
+		lblNewLabel_1_2.setBounds(301, 10, 118, 27);
+		panelklinik.add(lblNewLabel_1_2);
+		
+		txtKlinikAdi = new JTextField();
+		txtKlinikAdi.setColumns(10);
+		txtKlinikAdi.setBounds(295, 36, 124, 27);
+		panelklinik.add(txtKlinikAdi);
+		
+		JButton btnKlinikadekle = new JButton("Ekle");
+		btnKlinikadekle.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if(txtKlinikAdi.getText().length()==0) {
+					Helper.showMsg("fill");
+				}else {
+					try {
+						if(klinik.addKlinik(txtKlinikAdi.getText())) {
+							Helper.showMsg("success");
+							txtKlinikAdi.setText(null);
+							updateClinicModel();
+						}
+					} catch (SQLException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+				}
+			}
+		});
+		btnKlinikadekle.setFont(new Font("Tahoma", Font.BOLD, 16));
+		btnKlinikadekle.setBounds(295, 73, 124, 29);
+		panelklinik.add(btnKlinikadekle);
+		
+		JScrollPane scrollPane_1 = new JScrollPane();
+		scrollPane_1.setBounds(429, 10, 208, 288);
+		panelklinik.add(scrollPane_1);
+		
+		JComboBox comboBoxdoktor = new JComboBox();
+		comboBoxdoktor.setBounds(295, 212, 128, 29);
+		for(int i=0; i<bashekim.getDoctorList().size() ; i++) {
+			comboBoxdoktor.addItem(bashekim.getDoctorList().get(i)getName());
+		}
+		panelklinik.add(comboBoxdoktor);
+		
+		JButton btnaddworker = new JButton("Ekle");
+		btnaddworker.setFont(new Font("Tahoma", Font.BOLD, 16));
+		btnaddworker.setBounds(295, 254, 124, 29);
+		panelklinik.add(btnaddworker);
+	}
+	
+	public void updateDoctorModel() throws SQLException {
+		DefaultTableModel clearModel = (DefaultTableModel) tableDoktor.getModel();
+		clearModel.setRowCount(0);
+		for(int i=0; i< bashekim.getDoctorList().size(); i++) {
+			doctorData[0] = bashekim.getDoctorList().get(i).getId();
+			doctorData[1] = bashekim.getDoctorList().get(i).getName();
+			doctorData[2] = bashekim.getDoctorList().get(i).getTcno();
+			doctorData[3] = bashekim.getDoctorList().get(i).getPassword();
+			doctorModel.addRow(doctorData);
+		}
+	}
+	public void updateClinicModel() throws SQLException {
+			DefaultTableModel clearModel = (DefaultTableModel) tableKlinik.getModel();
+			clearModel.setRowCount(0);
+			for(int i=0; i< klinik.getList().size(); i++) {
+				klinikData[0] = klinik.getList().get(i).getId();
+				klinikData[1] = klinik.getList().get(i).getName();
+				klinikModel.addRow(klinikData);
+			}
+	}
+}

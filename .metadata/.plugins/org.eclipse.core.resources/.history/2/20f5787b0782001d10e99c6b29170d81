@@ -1,0 +1,67 @@
+package Model;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+
+import Helper.DBConnection;
+
+public class Klinik {
+	DBConnection conn = new DBConnection();
+	Statement st = null;
+	ResultSet rs = null;
+	Connection con = conn.conDb();
+	PreparedStatement preparedStatement = null;
+	
+	private int id;
+	private String name;
+	
+	public Klinik() {}
+	
+	public Klinik(int id, String name) {
+		super();
+		this.id = id;
+		this.name = name;
+	}
+	
+	public ArrayList<Klinik> getList() throws SQLException{
+		ArrayList<Klinik> list = new ArrayList<>();
+		
+		Klinik obj;
+		try {
+		st = con.createStatement();
+		rs = st.executeQuery("SELECT * FROM klinik");
+		while(rs.next()) {
+			obj = new Klinik();
+			obj.setId(rs.getInt("id"));
+			obj.setName(rs.getString("name"));
+			list.add(obj);
+		}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}finally {} 
+		
+		
+		return list;
+		}		
+	
+	public int getId() {
+		return id;
+	}
+	public void setId(int id) {
+		this.id = id;
+	}
+	public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
+	}
+	
+	
+			
+
+}
